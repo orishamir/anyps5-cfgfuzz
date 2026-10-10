@@ -52,6 +52,9 @@ def layout(succ):
     return order
 
 
+PAD = 0  # extra v_add instructions per block (each adds ~60 estimated SPIR-V words)
+
+
 def assembly(succ):
     order = layout(succ)
     nxt = {order[i]: (order[i + 1] if i + 1 < len(order) else None) for i in range(len(order))}
@@ -60,6 +63,8 @@ def assembly(succ):
         s = succ[b]
         lines.append(f"B{b}:")
         lines.append(f"  v_add_f32 v1, {float(b + 1):.1f}, v1" if b + 1 in (1, 2, 4) else f"  v_add_f32 v1, 0x{0x3f800000 + b * 0x10000:x}, v1")
+        for k in range(PAD):
+            lines.append(f"  v_add_f32 v1, 0x{0x3f000000 + k * 0x1000 + b * 0x10:x}, v1")
         if not s:
             lines.append("  buffer_store_dword v1, off, s[4:7], 0")
             lines.append("  s_endpgm")
@@ -95,8 +100,12 @@ def assemble(asm_text):
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     ids = None
-    if len(sys.argv) > 4 and sys.argv[3] == "--ids":
-        ids = set(sys.argv[4].split(","))
+    global PAD
+    args = sys.argv[3:]
+    if "--pad" in args:
+        PAD = int(args[args.index("--pad") + 1])
+    if "--ids" in args:
+        ids = set(args[args.index("--ids") + 1].split(","))
     n = 0
     with open(dst, "w") as out:
         for line in open(src):

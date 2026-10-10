@@ -36,6 +36,7 @@ compile it the same way and link it into `cfgfuzz_x`. (`git merge-file` on two s
 ./cfgfuzz_main one "1;2,3;6;2,4;5,6;1;" 0           # one graph: successor lists per block, ';' separated
 ./cfgfuzz_main dump "1;2,3;6;2,4;5,6;1;" 0          # structurized blocks, merges, continue blocks, the rule's verdict
 ./cfgfuzz_main reduce corpus.graphs 442 16 10       # delta-reduce graph id 442 keeping its failure class
+python3 reduce2.py ./cfgfuzz_main OK ./cfgfuzz_x BUDGET "<graph text>" 1000   # reduce keeping A's and B's classes (regressions)
 ```
 
 `run_all.sh` runs the four variants at 0 and 16 words; `compare.py <results dir> <corpus>` prints per-variant class counts,
@@ -64,6 +65,7 @@ ninja -t commands tests/agc_shader_control_flow_tests | grep -- '-o tests/agc_sh
 
 ```sh
 python3 e2e/cfg2shader.py graphs.txt words.txt        # graphs.txt lines: <id>\t<graph text>
+python3 e2e/cfg2shader.py graphs.txt words.txt --pad 17   # 17 extra v_add per block: ~1100 estimated words per block
 ./e2e_main words.txt results.txt 20                    # per line: id, DONE | INVALID_SPIRV | VALID_BUT_VERIFY_FAILED | STRUCTURIZE | ..., details
 ./e2e_main dump "<hex words>"                           # GraphBuilder CFG as a makeGraph literal, structurized blocks, verdicts
 python3 e2e/reduce_e2e.py ./e2e_main "<graph text>" INVALID_SPIRV   # delta-reduce with the validator as oracle
