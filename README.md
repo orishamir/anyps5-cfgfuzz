@@ -83,3 +83,11 @@ Environment knobs: `CFGFUZZ_BIG_INDEX=<block>` forces which block gets the large
 - The generator skips loops with no exit. Programs that the structurizer refuses (`REFUSED`) were not reported: the smallest
   such abstract shape compiled fine as real code.
 - Resource guardrails used: at most 12 parallel runs, `ulimit -v`, outputs on disk.
+
+## prof/: where the structurizer's time goes
+
+`prof/prof.cpp` structurizes every graph of a `.graphs` file in one process (no fork) and prints wall-clock and
+outcome counts; with a third argument it also prints one line per graph (`id, microseconds, ok|fail, input blocks, output blocks`) to stderr.
+`prof/build_run.sh <variant>...` builds it with `-pg` against `variants/<v>/Structurizer.cpp` and writes `gprof_flat_<v>.txt` / `gprof_call_<v>.txt`
+for `prof/first500.graphs` (the first 500 graphs of corpus3, seed 3) at 1,000 words per block.
+Oct 10, 2026 results for AlxcBTW `0b56b7ad` (`alxc24b`) and Scramblrrrr `78ad086b` (`scram78`) are checked in (`gprof_flat_*.txt`, `pergraph_*.tsv`).
