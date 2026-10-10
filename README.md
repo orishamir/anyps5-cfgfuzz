@@ -72,6 +72,9 @@ python3 e2e/reduce_e2e.py ./e2e_main "<graph text>" INVALID_SPIRV   # delta-redu
 python3 e2e/tabulate2.py                               # summarizes sample_<variant>.results per sample class
 ```
 
+
+Environment knobs: `CFGFUZZ_BIG_INDEX=<block>` forces which block gets the large word count in `run`/`one`; `CFG2SHADER_PAD_BLOCK=<block>:<n>` pads one block instead of all.
+
 ## 3. Caveats
 
 - Shapes are abstract; the real CFG that `GraphBuilder` builds from the assembled program can differ (an `s_branch`

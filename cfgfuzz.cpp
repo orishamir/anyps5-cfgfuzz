@@ -100,7 +100,8 @@ ControlFlowGraph makeGraph(const Succ& successors, std::uint32_t words, std::uin
     graph.entryBlock = 0;
     std::uint64_t hash = 1469598103934665603ull;
     for (const auto& list : successors) { hash = (hash ^ (list.size() + 1)) * 1099511628211ull; for (auto t : list) hash = (hash ^ (t + 7)) * 1099511628211ull; }
-    const std::uint32_t bigIndex = successors.empty() ? 0u : static_cast<std::uint32_t>(hash % successors.size());
+    std::uint32_t bigIndex = successors.empty() ? 0u : static_cast<std::uint32_t>(hash % successors.size());
+    if (const char* forced = std::getenv("CFGFUZZ_BIG_INDEX")) bigIndex = static_cast<std::uint32_t>(std::strtoul(forced, nullptr, 10));
     for (std::uint32_t id = 0; id < successors.size(); ++id) {
         BasicBlock block;
         block.id = id;

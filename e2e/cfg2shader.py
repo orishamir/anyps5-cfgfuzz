@@ -63,7 +63,11 @@ def assembly(succ):
         s = succ[b]
         lines.append(f"B{b}:")
         lines.append(f"  v_add_f32 v1, {float(b + 1):.1f}, v1" if b + 1 in (1, 2, 4) else f"  v_add_f32 v1, 0x{0x3f800000 + b * 0x10000:x}, v1")
-        for k in range(PAD):
+        pad_here = PAD
+        if os.environ.get("CFG2SHADER_PAD_BLOCK"):
+            blk, n = os.environ["CFG2SHADER_PAD_BLOCK"].split(":")
+            pad_here = int(n) if b == int(blk) else 0
+        for k in range(pad_here):
             lines.append(f"  v_add_f32 v1, 0x{0x3f000000 + k * 0x1000 + b * 0x10:x}, v1")
         if not s:
             lines.append("  buffer_store_dword v1, off, s[4:7], 0")
