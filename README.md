@@ -39,7 +39,7 @@ compile it the same way and link it into `cfgfuzz_x`. (`git merge-file` on two s
 `run_all.sh` runs the four variants at 0 and 16 words; `compare.py <results dir> <corpus>` prints per-variant class counts,
 fixed/regressed/changed-class counts against `main`, and the smallest graph per failure class.
 Graph text: `1;2,3;6;2,4;5,6;1;` means block 0 -> 1, block 1 -> {2,3}, block 2 -> 6, ..., block 6 returns.
-`one` and `dump` print the same graph as a `makeGraph` literal for `tests/Structurizer.cpp`.
+`one` and `dump` print the graph as a `makeGraph` literal for `tests/Structurizer.cpp`, with blocks renumbered in breadth-first order from the entry (isomorphic to the input, ids may differ).
 
 ## 2. End to end (`e2e/`)
 
