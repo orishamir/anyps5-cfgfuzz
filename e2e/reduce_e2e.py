@@ -68,7 +68,9 @@ def main():
     while changed:
         changed = False
         for b in range(len(graph)):
-            if len(graph[b]) == 2 and not changed:
+            if changed:
+                break
+            if len(graph[b]) == 2:
                 for k in range(2):
                     c = [list(x) for x in graph]
                     del c[b][k]
