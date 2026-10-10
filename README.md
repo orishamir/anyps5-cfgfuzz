@@ -31,6 +31,8 @@ compile it the same way and link it into `cfgfuzz_x`. (`git merge-file` on two s
 ```sh
 ./cfgfuzz_main gen 30000 3 corpus.graphs            # deterministic corpus; seed 3 is the one in the reports
 ./cfgfuzz_main run corpus.graphs main_w16.results 16 10   # <words per block> <timeout s>; 16 and 0 were both used
+./cfgfuzz_main run corpus.graphs main_big.results 16 10 1000  # 7th arg: one pseudo-random block per graph gets 1000 words,
+                                                    # which reaches privatizeSharedReturns (only taken above 256 words)
 ./cfgfuzz_main one "1;2,3;6;2,4;5,6;1;" 0           # one graph: successor lists per block, ';' separated
 ./cfgfuzz_main dump "1;2,3;6;2,4;5,6;1;" 0          # structurized blocks, merges, continue blocks, the rule's verdict
 ./cfgfuzz_main reduce corpus.graphs 442 16 10       # delta-reduce graph id 442 keeping its failure class

@@ -95,9 +95,12 @@ void requireOriginalBlocksPresent(const ControlFlowGraph& graph, std::size_t ori
 }
 
 // ---------------------------------------------------------------- graph <-> text
-ControlFlowGraph makeGraph(const Succ& successors, std::uint32_t words) {
+ControlFlowGraph makeGraph(const Succ& successors, std::uint32_t words, std::uint32_t bigWords = 0) {
     ControlFlowGraph graph;
     graph.entryBlock = 0;
+    std::uint64_t hash = 1469598103934665603ull;
+    for (const auto& list : successors) { hash = (hash ^ (list.size() + 1)) * 1099511628211ull; for (auto t : list) hash = (hash ^ (t + 7)) * 1099511628211ull; }
+    const std::uint32_t bigIndex = successors.empty() ? 0u : static_cast<std::uint32_t>(hash % successors.size());
     for (std::uint32_t id = 0; id < successors.size(); ++id) {
         BasicBlock block;
         block.id = id;
@@ -106,6 +109,7 @@ ControlFlowGraph makeGraph(const Succ& successors, std::uint32_t words) {
         block.instructionBegin = id * 2;
         block.instructionEnd = id * 2 + 2;
         block.estimatedSpirvWords = words;
+        if (bigWords != 0 && !successors.empty() && id == bigIndex) block.estimatedSpirvWords = bigWords;
         block.successors = successors[id];
         auto& t = block.terminator;
         if (successors[id].empty()) t.kind = TerminatorKind::Return;
@@ -361,6 +365,7 @@ struct Generator {
 // ---------------------------------------------------------------- running one graph in a child
 struct Outcome { std::string cls; std::string message; };
 
+std::uint32_t g_bigWords = 0;
 Outcome runChild(const Succ& s, std::uint32_t words, unsigned timeoutSeconds) {
     int fds[2];
     if (pipe(fds) != 0) return {"CRASH", "pipe failed"};
@@ -370,7 +375,7 @@ Outcome runChild(const Succ& s, std::uint32_t words, unsigned timeoutSeconds) {
         alarm(timeoutSeconds);
         std::string result;
         try {
-            auto graph = makeGraph(s, words);
+            auto graph = makeGraph(s, words, g_bigWords);
             const auto original = graph.blocks.size();
             Structurizer{}.Structurize(graph);
             try {
@@ -481,6 +486,7 @@ int main(int argc, char** argv) {
     if (mode == "run" && argc >= 4) {
         const std::uint32_t words = argc >= 5 ? static_cast<std::uint32_t>(std::strtoul(argv[4], nullptr, 10)) : 0u;
         const unsigned timeoutSeconds = argc >= 6 ? static_cast<unsigned>(std::strtoul(argv[5], nullptr, 10)) : 10u;
+        g_bigWords = argc >= 7 ? static_cast<std::uint32_t>(std::strtoul(argv[6], nullptr, 10)) : 0u;
         std::ifstream in(argv[2]);
         std::ofstream out(argv[3]);
         std::string line;
